@@ -12,11 +12,15 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ephron.sngtab.base.JenuineActivity;
@@ -32,7 +36,7 @@ import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
 import com.facebook.android.Facebook.DialogListener;
 
-public class ConnectSocialMedia extends JenuineActivity {
+public class ConnectSocialMedia extends JenuineActivity implements OnTouchListener{
 	private static final int LINKEDIN = 1;
 	private static final int TWITTER = 2;
 	private ConfigureLinkedinAuthTokens cLT;
@@ -60,6 +64,9 @@ public class ConnectSocialMedia extends JenuineActivity {
 		loginTwitter = new LoginTwitter(cTT, this);
 		loginLinkedin = new LoginLinkedin(cLT, this);
 
+		
+		
+		
 		if (manager.getLinkedinToken().length() >= 2) {
 			findViewById(R.id.text3).setBackgroundResource(
 					R.drawable.linkedin_coinnected);
@@ -89,7 +96,7 @@ public class ConnectSocialMedia extends JenuineActivity {
 				Toast.makeText(
 						getApplicationContext(),
 						"Already connected (" + manager.getFacebooktoken()
-								+ ")", Toast.LENGTH_SHORT).show();
+								+ ") Longpress to Logout", Toast.LENGTH_SHORT).show();
 			} else 
 				fbLogin(manager);
 			}
@@ -106,7 +113,7 @@ public class ConnectSocialMedia extends JenuineActivity {
 					Toast.makeText(
 							getApplicationContext(),
 							"Already connected (" + manager.getTwittertoken()
-									+ ")", Toast.LENGTH_SHORT).show();
+									+ ") Longpress to Logout", Toast.LENGTH_SHORT).show();
 				} else {
 
 					loadThread(TWITTER);
@@ -115,6 +122,32 @@ public class ConnectSocialMedia extends JenuineActivity {
 			}
 		});
 
+		findViewById(R.id.text3).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// linkedin
+				/*
+				 * Toast.makeText(getApplicationContext(), "Link",
+				 * Toast.LENGTH_SHORT).show();
+				 */
+
+				if (manager.getLinkedinToken().length() >= 2) {
+					// findViewById(R.id.text3).setBackgroundResource(
+					// R.drawable.linked_connect);
+					Toast.makeText(
+							getApplicationContext(),
+							"Already connected (" + manager.getLinkedinToken()
+									+ ") Longpress to Logout", Toast.LENGTH_SHORT).show();
+				} else {
+					loadThread(LINKEDIN);
+				}
+			}
+		});
+		
+		findViewById(R.id.text1).setOnTouchListener(this);
+		findViewById(R.id.text2).setOnTouchListener(this);
+		findViewById(R.id.text3).setOnTouchListener(this);
 		findViewById(R.id.text3).setOnLongClickListener(
 				new View.OnLongClickListener() {
 
@@ -155,28 +188,7 @@ public class ConnectSocialMedia extends JenuineActivity {
 					}
 				});
 
-		findViewById(R.id.text3).setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// linkedin
-				/*
-				 * Toast.makeText(getApplicationContext(), "Link",
-				 * Toast.LENGTH_SHORT).show();
-				 */
-
-				if (manager.getLinkedinToken().length() >= 2) {
-					// findViewById(R.id.text3).setBackgroundResource(
-					// R.drawable.linked_connect);
-					Toast.makeText(
-							getApplicationContext(),
-							"Already connected (" + manager.getLinkedinToken()
-									+ ")", Toast.LENGTH_SHORT).show();
-				} else {
-					loadThread(LINKEDIN);
-				}
-			}
-		});
+	
 
 	}
 	protected void loadThread(final int media) {
@@ -239,7 +251,29 @@ public class ConnectSocialMedia extends JenuineActivity {
 			
 		}
 	}
-	
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN: {
+			TextView view = (TextView) v;
+			// overlay is black with transparency of 0x77 (119)
+			view.getBackground().setColorFilter(0x77000000,
+					PorterDuff.Mode.SRC_ATOP);
+			view.invalidate();
+			break;
+		}
+		case MotionEvent.ACTION_UP:
+		case MotionEvent.ACTION_CANCEL: {
+			TextView view = (TextView) v;
+			// clear the overlay
+			// ss
+			view.getBackground().clearColorFilter();
+			view.invalidate();
+		}
+		}
+		return false;
+	}
 
 	
 }
